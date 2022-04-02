@@ -4,14 +4,11 @@ import com.neovisionaries.i18n.CountryCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import xyz.amricko0b.wisecounterz.data.CountryCounter;
 import xyz.amricko0b.wisecounterz.data.CountryCounterManager;
 import xyz.amricko0b.wisecounterz.data.jpa.entity.CountryCounterEntity;
 import xyz.amricko0b.wisecounterz.data.jpa.repository.CountryCounterRepository;
-
-import java.util.Optional;
 
 /**
  * JPA implementation of {@link CountryCounterManager}.
@@ -29,38 +26,29 @@ public class CountryCounterJpaManager extends AbstractJpaManager<CountryCounter,
     private final CountryCounterEntityFactory factory;
 
     /**
-     * Expected to be called from existed transaction.
-     * Otherwise, will fail.
-     * <p>
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional(propagation = Propagation.MANDATORY)
-    public Optional<CountryCounter> findByExclusive(CountryCode countryCode) {
-        return Optional.empty();
-    }
-
-    /**
      * Supports current transaction or runs new.
      * <p>
      * {@inheritDoc}
+     *
+     * @param countryCode
      */
     @Override
     @Transactional
-    public Long increment(CountryCounter countryCounter) {
-        return null;
-    }
+    public Long incrementBy(CountryCode countryCode) {
 
-    /**
-     * Supports current transaction or runs new.
-     * <p>
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional
-    public void initiate(CountryCode countryCode) {
-        final var entity = factory.createInitial(countryCode);
-        getRepository().save(entity);
+        repository.lockOn(countryCode.getNumeric());
+
+        return repository.findById(countryCode)
+                .map(counter -> {
+                    final var incremented = counter.getCounter() + 1;
+                    counter.setCounter(incremented);
+                    repository.save(counter);
+                    return incremented;
+                }).orElseGet(() -> {
+                    final var fresh = factory.createInitial(countryCode);
+                    repository.save(fresh);
+                    return fresh.getCounter();
+                });
     }
 
     @Override

@@ -2,9 +2,9 @@ package xyz.amricko0b.wisecounterz.domain;
 
 import com.neovisionaries.i18n.CountryCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import xyz.amricko0b.wisecounterz.data.CountryCounter;
 import xyz.amricko0b.wisecounterz.data.CountryCounterManager;
 
@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
  *
  * @author amricko0b
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CountryCounterServiceImpl implements CountryCounterService {
@@ -31,27 +32,32 @@ public class CountryCounterServiceImpl implements CountryCounterService {
 
     private final CountryCounterManager countryCounterManager;
 
+    private final CountryCodeSanitizer countryCodeSanitizer;
+
     /**
-     * Reading all available counters in one TX.
-     * Always starts new transaction!
-     * <p>
+     * Read all counters and place them in map
      * {@inheritDoc}
      */
     @Override
-    @Transactional(readOnly = true)
     public Map<CountryCode, Long> getAllCounters() {
+
+        log.info("All counters info requested");
+
         return countryCounterManager.findAll()
                 .stream()
                 .collect(COUNTRY_COUNTER_TO_MAP_COLLECTOR);
     }
 
     /**
-     * Increment counter exclusively.
-     * <p>
      * {@inheritDoc}
      */
     @Override
-    public Long incrementCounterBy(CountryCode countryCode) {
-        return Long.getLong("0");
+    public Pair<CountryCode, Long> incrementCounterByRaw(String countryCode) {
+
+        log.info("Try to increment counter for {}", countryCode);
+
+        final var sanitized = countryCodeSanitizer.sanitize(countryCode);
+        final var current = countryCounterManager.incrementBy(sanitized);
+        return Pair.of(sanitized, current);
     }
 }

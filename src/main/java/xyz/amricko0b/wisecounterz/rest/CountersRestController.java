@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import xyz.amricko0b.wisecounterz.domain.CountryCodeFactory;
+import xyz.amricko0b.wisecounterz.domain.CountryCodeSanitizer;
 import xyz.amricko0b.wisecounterz.domain.CountryCounterService;
 import xyz.amricko0b.wisecounterz.domain.NoSuchCountryException;
 import xyz.amricko0b.wisecounterz.rest.json.CountryCountersJson;
@@ -25,7 +25,6 @@ import java.util.Collections;
  *
  * @author amricko0b
  */
-@Slf4j
 @RequiredArgsConstructor
 @RestController
 @Tag(name = "Counters API", description = "Provides access to counters management")
@@ -33,8 +32,6 @@ import java.util.Collections;
 public class CountersRestController {
 
     private final CountryCounterService countryCounterService;
-
-    private final CountryCodeFactory countryCodeFactory;
 
     /**
      * Getting all info by country counters.
@@ -106,14 +103,10 @@ public class CountersRestController {
             @PathVariable("countryCode") String rawCountryCode
     ) {
         try {
-
-            // Create country code object or fail, if invalid
-            final var countryCode = countryCodeFactory.createBy(rawCountryCode);
-
             // Run incrementation logic and return current value
-            final var current = countryCounterService.incrementCounterBy(countryCode);
+            final var incremented = countryCounterService.incrementCounterByRaw(rawCountryCode);
             return new CountryCountersJson(
-                    Collections.singletonMap(countryCode, current)
+                    Collections.singletonMap(incremented.getFirst(), incremented.getSecond())
             );
 
         } catch (NoSuchCountryException ex) {

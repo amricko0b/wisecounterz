@@ -14,7 +14,7 @@ import javax.persistence.*;
  *
  * @author amricko0b
  */
-@Entity
+@Entity(name = "CountryCounter")
 @NoArgsConstructor
 @Table(name = "country_counter")
 public class CountryCounterEntity extends CountryCounter {

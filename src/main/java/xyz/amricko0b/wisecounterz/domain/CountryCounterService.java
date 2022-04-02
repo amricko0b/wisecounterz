@@ -1,6 +1,7 @@
 package xyz.amricko0b.wisecounterz.domain;
 
 import com.neovisionaries.i18n.CountryCode;
+import org.springframework.data.util.Pair;
 
 import java.util.Map;
 
@@ -19,10 +20,11 @@ public interface CountryCounterService {
     Map<CountryCode, Long> getAllCounters();
 
     /**
-     * Increment counter for provided country
+     * Try to increment counter for provided raw country code.
      *
-     * @param countryCode code of the country, which counter supposed to be increased
-     * @return current value after incrementation
+     * @param countryCode country code as string. Can be invalid
+     * @return pair of country code and current value after increment
+     * @throws NoSuchCountryException when code is invalid
      */
-    Long incrementCounterBy(CountryCode countryCode);
+    Pair<CountryCode, Long> incrementCounterByRaw(String countryCode);
 }

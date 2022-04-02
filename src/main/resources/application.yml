@@ -1,7 +1,14 @@
-springdoc:
-  api-docs:
-    path: /api-docs
+spring:
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:wisecounterz}
+    driver-class-name: org.postgresql.Driver
+    username: ${POSTGRES_USERNAME:wisecounterz}
+    password: ${POSTGRES_PASSWORD}
 
 server:
   error:
     include-stacktrace: never
+
+springdoc:
+  api-docs:
+    path: /api-docs

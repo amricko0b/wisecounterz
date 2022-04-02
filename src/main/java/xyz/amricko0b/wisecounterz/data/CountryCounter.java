@@ -11,7 +11,7 @@ import lombok.*;
  */
 @Getter
 @Setter
-@ToString(of = "countryCode")
+@ToString(of = {"countryCode", "counter"})
 @EqualsAndHashCode(of = "countryCode")
 public abstract class CountryCounter {
 

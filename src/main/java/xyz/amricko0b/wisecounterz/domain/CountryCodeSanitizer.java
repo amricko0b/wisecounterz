@@ -8,7 +8,7 @@ import com.neovisionaries.i18n.CountryCode;
  *
  * @author amricko0b
  */
-public interface CountryCodeFactory {
+public interface CountryCodeSanitizer {
 
     /**
      * Build an enum value from raw string.
@@ -17,5 +17,5 @@ public interface CountryCodeFactory {
      * @return an enum value
      * @throws NoSuchCountryException when country code is unsupported
      */
-    CountryCode createBy(String rawCountryCode);
+    CountryCode sanitize(String rawCountryCode);
 }

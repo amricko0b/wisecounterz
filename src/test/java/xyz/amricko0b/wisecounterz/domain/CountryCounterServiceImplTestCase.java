@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoSettings;
 import xyz.amricko0b.wisecounterz.data.CountryCounter;
 import xyz.amricko0b.wisecounterz.data.CountryCounterFactory;
@@ -20,6 +21,9 @@ import static org.mockito.Mockito.when;
 public class CountryCounterServiceImplTestCase implements WithAssertions {
 
     private CountryCounterFactory<TestCountryCounter> factory = new TestCountryCounterFactory();
+
+    @Spy
+    private CountryCodeSanitizer countryCodeSanitizer = new CountryCodeSanitizerImpl();
 
     @Mock
     private CountryCounterManager managerMock;
@@ -59,6 +63,22 @@ public class CountryCounterServiceImplTestCase implements WithAssertions {
         assertThat(counters.get(CountryCode.CY)).isEqualTo(1L);
         assertThat(counters.get(CountryCode.US)).isEqualTo(1L);
         assertThat(counters.get(CountryCode.RU)).isEqualTo(1L);
+    }
+
+    @Test
+    void test_incrementByWrongCode_fails() {
+        assertThatThrownBy(() -> service.incrementCounterByRaw("XYZ"))
+                .isInstanceOf(NoSuchCountryException.class)
+                .hasMessage("There is no such country: XYZ");
+    }
+
+    @Test
+    void test_incrementByCode_worksFine() {
+
+        when(managerMock.incrementBy(CountryCode.DE)).thenReturn(9L);
+        final var result = service.incrementCounterByRaw("de");
+        assertThat(result.getFirst()).isEqualTo(CountryCode.DE);
+        assertThat(result.getSecond()).isEqualTo(9L);
     }
 
     @AfterEach

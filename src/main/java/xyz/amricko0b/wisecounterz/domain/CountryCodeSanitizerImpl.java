@@ -6,12 +6,12 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 /**
- * Basic implementation of {@link CountryCodeFactory}.
+ * Basic implementation of {@link CountryCodeSanitizer}.
  *
  * @author amricko0b
  */
 @Service
-public class CountryCodeFactoryImpl implements CountryCodeFactory {
+public class CountryCodeSanitizerImpl implements CountryCodeSanitizer {
 
     private static final int COUNTRY_CODE_LENGTH = 2;
 
@@ -19,12 +19,12 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
      * Leverage the functionality of nv-i18n library.
      * This method also applies suitable validations.
      * <p>
-     * Library considers codes longer than 2 characters to be alpha3, but we need alpha2, so we add additional constraint.
-     * <p>
      * {@inheritDoc}
      */
     @Override
-    public CountryCode createBy(String rawCountryCode) {
+    public CountryCode sanitize(String rawCountryCode) {
+
+        // Library considers codes longer than 2 characters to be alpha3, but we need alpha2, so we add additional constraint.
         if (rawCountryCode.length() != COUNTRY_CODE_LENGTH) {
             throw new NoSuchCountryException(rawCountryCode);
         }
